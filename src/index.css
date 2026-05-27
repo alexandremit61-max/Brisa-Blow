@@ -1,34 +1,36 @@
 /* ============================================================
-   Edição Brisa-Blow - CSS Global Consolidado (Professional)
+   Edição Brisa-Blow - CSS Global Consolidado (Estabilidade Total)
    ============================================================ */
 :root, [data-theme='dark'] {
-  /* Paleta Noite (Dark Premium) */
-  --bg-main: #050b10;
-  --bg-card: #0f1720;
-  --bg-sidebar: #07090d;
-  --bg-topbar: rgba(10, 14, 20, 0.85);
-  --border: #1a2533;
+  /* PALETA NOITE - (Cinza-Azulado Cisco Premium Modificado) */
+  --bg-main: #141b29;       /* Fundo escuro fosco e suave (Ajustado!) */
+  --bg-card: #1c2635;       /* Blocos integrados suaves */
+  --bg-sidebar: #0f1520;    /* Barra lateral combinando com o fundo */
+  --bg-topbar: rgba(28, 38, 53, 0.85);
+  --border: #263347;        /* Linhas divisórias sutis */
+  --text: #e6edf5;
+  --text-muted: #94a3b8;
+  
+  /* Cores Operacionais do NOC */
   --orange: #ff4500;
   --blue: #00bfff;
   --green: #00ff9d;
   --red: #ff3131;
   --purple: #7c3aed;
   --amber: #ffae00;
-  --text: #e6edf5;
-  --text-muted: #94a3b8;
   --sidebar-w: 240px;
   --sidebar-collapsed: 70px;
   --topbar-h: 64px;
 }
 
 [data-theme='light'], body.light {
-  /* Paleta Dia (Light NOC Otimizado) */
-  --bg-main: #f1f5f9;
-  --bg-card: #ffffff;
-  --bg-sidebar: #ffffff;
+  /* PALETA DIA - (Branco Fosco/Gelo Anti-Reflexo) */
+  --bg-main: #f4f6f9;       
+  --bg-card: #ffffff;       
+  --bg-sidebar: #ffffff;    
   --bg-topbar: rgba(255, 255, 255, 0.95);
-  --border: #cbd5e1;
-  --text: #1e293b;
+  --border: #cbd5e1;        
+  --text: #1e293b;          
   --text-muted: #64748b;
   --orange: #ff4500;
   --blue: #2563eb;
@@ -242,16 +244,15 @@ body {
   padding: 8px 15px; 
   width: 380px; 
 }
-.ai-search i { color: var(--blue); font-size: 14px; }
 .ai-search input { background: transparent; border: none; color: var(--text); font-size: 12px; outline: none; flex: 1; }
-.ai-search kbd { font-size: 10px; color: var(--text-muted); background: rgba(148,163,184,0.1); padding: 2px 5px; border-radius: 4px; }
 
 .topbar-right { display: flex; align-items: center; gap: 18px; }
 .icon-btn { background: transparent; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; }
 .icon-btn:hover { color: var(--text); }
-.icon-btn.has-dot::after { content: ""; position: absolute; top: -2px; right: -2px; width: 6px; height: 6px; background: var(--orange); border-radius: 50%; box-shadow: 0 0 5px var(--orange); }
 
 .net-status { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--green); font-weight: 700; text-transform: uppercase; }
+
+/* COMPILADOR VITE AJUSTADO */
 .pulse-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.92); } }
 
@@ -262,7 +263,6 @@ body {
 .user-meta strong { display: block; font-size: 11px; white-space: nowrap; color: var(--text); }
 .user-meta small { font-size: 9px; color: var(--text-muted); }
 .btn-logout { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding-left: 10px; font-size: 14px; border-left: 1px solid var(--border); display: flex; align-items: center; }
-.btn-logout:hover { color: var(--red); }
 
 /* ============================================================
    KPI CARDS E LAYOUT DAS VIEWS

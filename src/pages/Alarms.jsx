@@ -23,8 +23,8 @@ function Alarms() {
     <div className="page active">
       <div className="page-head" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1>Central de Alarmes</h1>
-          <p>Mapeamento de Incidentes de Rede e Criticidade Crítica em Tempo Real</p>
+          <h1 style={{ color: 'var(--text)', transition: 'color 0.25s ease' }}>Central de Alarmes</h1>
+          <p style={{ color: 'var(--text-muted)', transition: 'color 0.25s ease' }}>Mapeamento de Incidentes de Rede e Criticidade Crítica em Tempo Real</p>
         </div>
         
         {/* Barra de pesquisa rápida integrada */}
@@ -34,35 +34,36 @@ function Alarms() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{
-            background: '#0f1720',
-            border: '1px solid #1e293b',
-            color: '#fff',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            color: 'var(--text)',
             padding: '8px 16px',
             borderRadius: '6px',
             width: '280px',
-            fontSize: '13px'
+            fontSize: '13px',
+            transition: 'all 0.25s ease'
           }}
         />
       </div>
 
-      <div className="card" style={{ padding: '0px', background: '#0f1720', minHeight: '65vh' }}>
-        <div className="card-head" style={{ padding: '15px 20px', borderBottom: '1px solid #1e293b' }}>
-          <h3>Alarmes Ativos</h3>
+      <div className="card" style={{ padding: '0px', minHeight: '65vh' }}>
+        <div className="card-head" style={{ padding: '15px 20px', borderBottom: '1px solid var(--border)' }}>
+          <h3 style={{ color: 'var(--text)' }}>Alarmes Ativos</h3>
           <span className="chip red">{filteredAlarms.filter(a => a.status !== 'GREEN').length} Ativos</span>
         </div>
 
         <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '1px solid #1e293b' }}>
-              <th style={{ padding: '15px 20px', fontSize: '11px', color: '#64748b', textTransform: 'uppercase' }}>Status</th>
-              <th style={{ padding: '15px 20px', fontSize: '11px', color: '#64748b', textTransform: 'uppercase' }}>Site</th>
-              <th style={{ padding: '15px 20px', fontSize: '11px', color: '#64748b', textTransform: 'uppercase' }}>Descrição</th>
-              <th style={{ padding: '15px 20px', fontSize: '11px', color: '#64748b', textTransform: 'uppercase', textAlign: 'right' }}>Ação</th>
+            <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
+              <th style={{ padding: '15px 20px', fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Status</th>
+              <th style={{ padding: '15px 20px', fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Site</th>
+              <th style={{ padding: '15px 20px', fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Descrição</th>
+              <th style={{ padding: '15px 20px', fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', textAlign: 'right' }}>Ação</th>
             </tr>
           </thead>
           <tbody>
             {filteredAlarms.map((alarm) => (
-              <tr key={alarm.id} style={{ borderBottom: '1px solid #0f1720', background: 'transparent', transition: 'background 0.2s' }}>
+              <tr key={alarm.id} style={{ borderBottom: '1px solid var(--border)', background: 'transparent' }}>
                 <td style={{ padding: '15px 20px' }}>
                   <span className={`chip ${
                     alarm.status === 'RED' ? 'red' : alarm.status === 'AMBER' ? 'amber' : 'green'
@@ -70,11 +71,12 @@ function Alarms() {
                     {alarm.status}
                   </span>
                 </td>
-                <td style={{ padding: '15px 20px', fontWeight: 'bold', color: '#fff', fontSize: '13px' }}>
+                <td style={{ padding: '15px 20px', fontWeight: 'bold', color: 'var(--text)', fontSize: '13px' }}>
                   {alarm.site}
                 </td>
-                <td style={{ padding: '15px 20px', color: '#94a3b8', fontSize: '13px' }}>
-                  {alarm.description} <span style={{ fontSize: '11px', color: '#475569', marginLeft: '8px' }}>({alarm.time})</span>
+                <td style={{ padding: '15px 20px', color: 'var(--text-muted)', fontSize: '13px' }}>
+                  <span style={{ color: 'var(--text)' }}>{alarm.description}</span> 
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '8px' }}>({alarm.time})</span>
                 </td>
                 <td style={{ padding: '15px 20px', textAlign: 'right' }}>
                   <button 
@@ -82,14 +84,14 @@ function Alarms() {
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: '#64748b',
+                      color: 'var(--text-muted)',
                       cursor: 'pointer',
                       fontSize: '16px',
                       padding: '4px 8px',
                       transition: 'color 0.2s'
                     }}
                     onMouseEnter={(e) => e.target.style.color = 'var(--blue)'}
-                    onMouseLeave={(e) => e.target.style.color = '#64748b'}
+                    onMouseLeave={(e) => e.target.style.color = 'var(--text-muted)'}
                   >
                     👁️
                   </button>
@@ -98,7 +100,7 @@ function Alarms() {
             ))}
             {filteredAlarms.length === 0 && (
               <tr>
-                <td colSpan="4" style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: '13px' }}>
+                <td colSpan="4" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
                   Nenhum alarme crítico encontrado para os filtros aplicados.
                 </td>
               </tr>
