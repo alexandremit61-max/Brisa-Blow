@@ -22,36 +22,39 @@ function AiAssistant() {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   
+  // ID único gerado dinamicamente por sessão de aba do operador
+  const [sessionId] = useState(() => 'sess_' + Math.random().toString(36).substr(2, 9));
+
+  const [selectedFile, setSelectedFile] = useState(null);
+
   const windowRef = useRef(null);
   const chatEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // --- NOVA FUNÇÃO: FECHAR E REINICIAR ---
+  // --- FUNÇÃO: FECHAR E REINICIAR ---
   const handleCloseAndReset = () => {
     setIsOpen(false);
-    // Pequeno delay para a animação de fechar antes de limpar (opcional)
+    // Dispara o aviso de limpeza para o back
+    fetch('http://127.0.0.1:8000/api/agent/reset-cache/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId: sessionId })
+    });
+    
     setTimeout(() => {
       setMessages([initialGreeting]); // Reinicia a conversa
       setInputValue(''); // Limpa o campo de texto
       setIsTyping(false);
+      setSelectedFile(null);
     }, 300);
   };
 
-  // Base de dados mockada (igual ao anterior)
-  const sitesDatabase = {
-    fortaleza: [
-      { id: "FLA0002", status: "up", failType: null },
-      { id: "FLA0008", status: "down", failType: "Tensão Baixa" },
-      { id: "FLA0011", status: "down", failType: "Falta de AC (Energia)" },
-    ],
-    juazeiro: [
-      { id: "JUO0001", status: "down", failType: "Falta de AC Concessionária" },
-      { id: "JUO0003", status: "down", failType: "Banco de Baterias Descarregado" },
-    ],
-    mossoro: [
-      { id: "MRO0005", status: "down", failType: "Banco de Baterias Crítico" },
-      { id: "MRO0006", status: "down", failType: "Tensão Alta Concessionária" }
-    ]
+  // Escuta a seleção do arquivo vinda do clipe 📎
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+      setMessages(prev => [...prev, { sender: 'bot', text: `📎 Arquivo preparado para envio: ${e.target.files[0].name}` }]);
+    }
   };
 
   useEffect(() => {
@@ -60,25 +63,41 @@ function AiAssistant() {
     }
   }, [messages, isTyping]);
 
-  // --- ENGINE DE PROCESSAMENTO ---
-  const processUserQuery = (query) => {
-    const text = query.toLowerCase();
+  // --- ENGINE DE PROCESSAMENTO INTEGRADO AO DJANGO ---
+  const processUserQuery = async (query) => {
     setIsTyping(true);
 
-    setTimeout(() => {
-      let responseText = "Desculpe, não consegui correlacionar esse incidente. Tente perguntar sobre Fortaleza, Mossoró ou Juazeiro.";
-
-      if (text.includes('fortaleza')) {
-        responseText = `📊 [AUDITORIA FORTALEZA]\n• Estações inoperantes: 2\n• Motivos: 1 Falha de Energia AC e 1 Instabilidade de Tensão.`;
-      } else if (text.includes('juazeiro')) {
-        responseText = `📊 [AUDITORIA JUAZEIRO]\n• Estações inoperantes: 2\n• Diagnóstico: Queda de AC Concessionária Coelba e Banco de Baterias esgotado.`;
-      } else if (text.includes('mossoro') || text.includes('mossoró')) {
-        responseText = `📊 [AUDITORIA MOSSORÓ]\n• MRO0005: Bateria Crítica (abaixo de 44V).\n• MRO0006: Tensão Alta na entrada AC.`;
+    try {
+      const formData = new FormData();
+      formData.append('message', query);
+      formData.append('sessionId', sessionId); // 🌟 Ajustado para enviar o ID dinâmico real da sessão
+      
+      if (selectedFile) {
+        formData.append('file', selectedFile);
       }
 
-      setMessages(prev => [...prev, { sender: 'bot', text: responseText }]);
+      // Utilizando o IP direto para evitar problemas de resolução de localhost no Linux
+      const response = await fetch('http://127.0.0.1:8000/api/agent/chat/', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Falha na comunicação com o servidor backend.');
+      }
+
+      const data = await response.json();
+      setMessages(prev => [...prev, { sender: 'bot', text: data.response }]);
+    
+      // Limpa o arquivo após o envio bem-sucedido
+      setSelectedFile(null);
+
+    } catch (error) {
+      console.error(error);
+      setMessages(prev => [...prev, { sender: 'bot', text: '⚠️ Erro técnico de conexão ao enviar dados. Verifique se o Django está ativo na porta 8000.' }]);
+    } finally {
       setIsTyping(false);
-    }, 1000);
+    }
   };
 
   const handleSendMessage = () => {
@@ -153,7 +172,6 @@ function AiAssistant() {
               <span style={{ fontSize: '16px' }}>🤖</span>
               <strong style={{ color: '#fff', fontSize: '13px', fontFamily: 'monospace' }}>BRISANET COGNITIVE IA</strong>
             </div>
-            {/* BOTÃO X CHAMANDO A FUNÇÃO DE RESET */}
             <button 
               onClick={handleCloseAndReset} 
               style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '14px', padding: '5px' }}
@@ -174,7 +192,7 @@ function AiAssistant() {
                   border: msg.sender === 'user' ? 'none' : '1px solid #1e293b'
                 }}
               >
-                {msg.text}
+                {msg.text.split('\n').map((line, i) => <div key={i}>{line}</div>)}
               </div>
             ))}
             {isTyping && (
@@ -187,15 +205,31 @@ function AiAssistant() {
 
           {/* Input zone */}
           <div className="chat-input-zone" style={{ background: '#0f172a', padding: '12px', borderTop: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#64748b' }}>📎</button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileChange} 
+              accept=".csv,.pdf,.xlsx" 
+              style={{ display: 'none' }} 
+            />
+            
+            <button 
+              onClick={() => fileInputRef.current.click()} 
+              style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: selectedFile ? 'var(--blue)' : '#64748b' }}
+            >
+              📎
+            </button>
+            
+            {/* 🌟 Mantido apenas um input limpo e condicional */}
             <input 
               type="text" 
-              placeholder="Digite sua dúvida técnica..." 
+              placeholder={selectedFile ? "Arquivo pronto! Digite sua pergunta sobre ele..." : "Digite sua dúvida técnica..."}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               style={{ flex: 1, background: '#070c14', border: '1px solid #1e293b', color: '#fff', padding: '8px 12px', borderRadius: '6px' }}
             />
+
             <button style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#64748b' }}>🎙️</button>
             <button onClick={handleSendMessage} style={{ background: 'var(--blue)', border: 'none', color: '#fff', padding: '8px 14px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Enviar</button>
           </div>
@@ -208,4 +242,3 @@ function AiAssistant() {
 }
 
 export default AiAssistant;
-
